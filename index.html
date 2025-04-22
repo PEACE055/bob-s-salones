@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Salon Appointment System</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    .appointment-row:hover {
+      background-color: #fdf2f8;
+    }
+    .status-confirmed {
+      background-color: #dcfce7;
+      color: #166534;
+    }
+    .status-cancelled {
+      background-color: #fee2e2;
+      color: #991b1b;
+    }
+    .status-pending {
+      background-color: #fef9c3;
+      color: #854d0e;
+    }
+    #loadingSpinner {
+      display: none;
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+  <!-- Navbar -->
+  <header class="bg-white shadow sticky top-0 z-10">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold text-pink-600">Bob's Salon</h1>
+      <nav>
+        <ul class="flex space-x-6 text-sm font-semibold">
+          <li><a href="#services" class="hover:text-pink-500 transition">Services</a></li>
+          <li><a href="#booking" class="hover:text-pink-500 transition">Book Now</a></li>
+          <li><a href="#appointments" class="hover:text-pink-500 transition">My Appointments</a></li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="bg-pink-100 py-20 px-4 text-center">
+    <div class="max-w-3xl mx-auto">
+      <h2 class="text-4xl font-bold mb-4 text-pink-700">Your Beauty, Our Passion</h2>
+      <p class="text-lg text-gray-700 mb-6">Book appointments with your favorite stylists at Bob's Salon in just a few clicks.</p>
+      <a href="#booking" class="bg-pink-600 text-white px-6 py-3 rounded-full shadow hover:bg-pink-700 transition inline-block">Book an Appointment</a>
+    </div>
+  </section>
+
+  <!-- Services Section -->
+  <section id="services" class="py-16 bg-white px-4">
+    <div class="max-w-7xl mx-auto">
+      <h3 class="text-3xl font-bold text-center mb-12 text-pink-700">Our Services</h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-10" id="servicesList">
+        <!-- Services will be loaded dynamically -->
+      </div>
+    </div>
+  </section>
+
+  <!-- Booking Section -->
+  <section id="booking" class="py-16 bg-gray-100 px-4">
+    <div class="max-w-2xl mx-auto">
+      <h3 class="text-3xl font-bold text-center mb-10 text-pink-700">Book Your Appointment</h3>
+      <form class="bg-white p-6 rounded-lg shadow space-y-4" id="bookingForm">
+        <input type="hidden" id="appointmentId">
+        <div>
+          <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+          <input type="text" id="name" placeholder="Enter your full name" required 
+                 class="w-full px-4 py-2 border rounded focus:ring-pink-500 focus:border-pink-500">
+        </div>
+        <div>
+          <label for="email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+          <input type="email" id="email" placeholder="Enter your email" required 
+                 class="w-full px-4 py-2 border rounded focus:ring-pink-500 focus:border-pink-500">
+        </div>
+        <div>
+          <label for="phone" class="block text-sm font-medium text-gray-700 mb-1">Phone Number</label>
+          <input type="tel" id="phone" placeholder="Enter your phone number" required 
+                 class="w-full px-4 py-2 border rounded focus:ring-pink-500 focus:border-pink-500">
+        </div>
+        <div>
+          <label for="service" class="block text-sm font-medium text-gray-700 mb-1">Service</label>
+          <select id="service" required class="w-full px-4 py-2 border rounded focus:ring-pink-500 focus:border-pink-500">
+            <option value="">Select a service</option>
+            <!-- Services will be loaded dynamically -->
+          </select>
+        </div>
+        <div>
+          <label for="date" class="block text-sm font-medium text-gray-700 mb-1">Date</label>
+          <input type="date" id="date" required 
+                 class="w-full px-4 py-2 border rounded focus:ring-pink-500 focus:border-pink-500">
+        </div>
+        <div>
+          <label for="time" class="block text-sm font-medium text-gray-700 mb-1">Time</label>
+          <input type="time" id="time" required 
+                 class="w-full px-4 py-2 border rounded focus:ring-pink-500 focus:border-pink-500">
+        </div>
+        <button type="submit" class="bg-pink-600 text-white px-6 py-3 rounded hover:bg-pink-700 transition w-full font-medium">
+          Confirm Appointment
+        </button>
+      </form>
+    </div>
+  </section>
+
+  <!-- Appointments Section -->
+  <section id="appointments" class="py-16 bg-white px-4">
+    <div class="max-w-7xl mx-auto">
+      <h3 class="text-3xl font-bold text-center mb-12 text-pink-700">My Appointments</h3>
+      <div class="overflow-x-auto">
+        <table class="min-w-full bg-white border border-gray-200 rounded-lg overflow-hidden">
+          <thead>
+            <tr class="bg-pink-600 text-white">
+              <th class="py-3 px-4 border-b text-left">Name</th>
+              <th class="py-3 px-4 border-b text-left">Service</th>
+              <th class="py-3 px-4 border-b text-left">Date & Time</th>
+              <th class="py-3 px-4 border-b text-left">Status</th>
+              <th class="py-3 px-4 border-b text-left">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="appointmentsList">
+            <!-- Appointments will be loaded here -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-pink-700 text-white py-8 mt-10">
+    <div class="max-w-6xl mx-auto px-4">
+      <div class="flex flex-col md:flex-row justify-between items-center">
+        <div class="mb-4 md:mb-0">
+          <h2 class="text-2xl font-bold mb-2">Bob's Salon</h2>
+          <p class="text-pink-100">Railway Station Road , Jaysingpur</p>
+          <p class="text-pink-100">Phone: 8766847203</p>
+        </div>
+        <div class="flex space-x-6">
+          <a href="#" class="text-pink-100 hover:text-white transition"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" class="text-pink-100 hover:text-white transition"><i class="fab fa-instagram"></i></a>
+          <a href="#" class="text-pink-100 hover:text-white transition"><i class="fab fa-twitter"></i></a>
+        </div>
+      </div>
+      <div class="border-t border-pink-600 mt-6 pt-6 flex flex-col md:flex-row justify-between items-center">
+        <p>&copy; 2025 Bob's Salon. All rights reserved.</p>
+        <div class="flex space-x-4 mt-4 md:mt-0">
+          <a href="#" class="text-pink-100 hover:text-white transition">Privacy Policy</a>
+          <a href="#" class="text-pink-100 hover:text-white transition">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Loading Spinner -->
+  <div id="loadingSpinner" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-30">
+    <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-pink-600"></div>
+  </div>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="fixed bottom-4 right-4 bg-green-600 text-white px-6 py-3 rounded shadow-lg hidden z-40">
+    <div class="flex items-center">
+      <span id="toastMessage" class="mr-4">Operation completed successfully!</span>
+      <button onclick="hideToast()" class="text-white hover:text-gray-200">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- JavaScript -->
+  <script>
+    // Global variables
+    let currentAppointmentId = null;
+    let deleteConfirmation = false;
+
+    // DOM Content Loaded
+    document.addEventListener("DOMContentLoaded", function() {
+      // Set minimum date to today
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('date').min = today;
+      
+      // Load initial data
+      loadServices();
+      loadAppointments();
+      
+      // Setup event listeners
+      setupEventListeners();
+    });
+
+    // Setup event listeners
+    function setupEventListeners() {
+      // Booking form submission
+      document.getElementById("bookingForm").addEventListener("submit", handleFormSubmit);
+      
+      // Modal confirm button
+      document.getElementById("modalConfirmBtn")?.addEventListener("click", function() {
+        if (deleteConfirmation && currentAppointmentId) {
+          deleteAppointment(currentAppointmentId);
+        }
+        closeModal();
+      });
+    }
+
+    // Load services from backend
+    async function loadServices() {
+      showLoading(true);
+      try {
+        const response = await fetch("http://localhost:8080/api/services");
+        if (response.ok) {
+          const services = await response.json();
+          renderServices(services);
+        } else {
+          throw new Error("Failed to load services");
+        }
+      } catch (error) {
+        console.error("Error loading services:", error);
+        // Fallback to default services
+        const defaultServices = [
+          {id: 1, name: "Haircut", description: "Basic haircut service", price: 25.00},
+          {id: 2, name: "Coloring", description: "Hair coloring service", price: 50.00},
+          {id: 3, name: "Styling", description: "Hair styling service", price: 35.00}
+        ];
+        renderServices(defaultServices);
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    // Render services to the page
+    function renderServices(services) {
+      const servicesList = document.getElementById("servicesList");
+      const serviceSelect = document.getElementById("service");
+      
+      // Clear existing options
+      servicesList.innerHTML = '';
+      serviceSelect.innerHTML = '<option value="">Select a service</option>';
+      
+      // Add services to both the services list and select dropdown
+      services.forEach(service => {
+        // Add to services list
+        const serviceCard = document.createElement('div');
+        serviceCard.className = 'bg-pink-50 p-6 rounded-lg shadow hover:shadow-md transition transform hover:-translate-y-1';
+        serviceCard.innerHTML = `
+          <h4 class="text-xl font-semibold mb-2 text-pink-700">${service.name}</h4>
+          <p class="text-gray-600 mb-3">${service.description}</p>
+          <p class="font-bold text-pink-600">Rs${service.price.toFixed(2)}</p>
+        `;
+        servicesList.appendChild(serviceCard);
+        
+        // Add to select dropdown
+        const option = document.createElement('option');
+        option.value = service.name;
+        option.textContent = `${service.name} (Rs${service.price.toFixed(2)})`;
+        serviceSelect.appendChild(option);
+      });
+    }
+
+    // Load appointments from backend
+    async function loadAppointments() {
+      showLoading(true);
+      try {
+        const response = await fetch("http://localhost:8080/api/appointments");
+        if (response.ok) {
+          const appointments = await response.json();
+          renderAppointments(appointments);
+        } else {
+          throw new Error("Failed to load appointments");
+        }
+      } catch (error) {
+        console.error("Error loading appointments:", error);
+        showToast("Error loading appointments. Please try again later.", "error");
+        renderEmptyAppointments();
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    // Render appointments to the page
+    function renderAppointments(appointments) {
+      const appointmentsList = document.getElementById("appointmentsList");
+      appointmentsList.innerHTML = '';
+      
+      if (appointments.length === 0) {
+        appointmentsList.innerHTML = `
+          <tr>
+            <td colspan="5" class="py-4 text-center text-gray-500">No appointments found. Book one now!</td>
+          </tr>
+        `;
+        return;
+      }
+
+      appointments.forEach(appointment => {
+        const date = new Date(appointment.appointmentDateTime);
+        const formattedDate = date.toLocaleDateString('en-US', { 
+          year: 'numeric', 
+          month: 'short', 
+          day: 'numeric' 
+        });
+        const formattedTime = date.toLocaleTimeString('en-US', {
+          hour: '2-digit',
+          minute: '2-digit'
+        });
+        
+        const statusClass = getStatusClass(appointment.status);
+        
+        const row = document.createElement('tr');
+        row.className = 'appointment-row';
+        row.innerHTML = `
+          <td class="py-3 px-4 border-b">${appointment.customerName}</td>
+          <td class="py-3 px-4 border-b">${appointment.serviceType}</td>
+          <td class="py-3 px-4 border-b">${formattedDate} at ${formattedTime}</td>
+          <td class="py-3 px-4 border-b">
+            <span class="text-xs px-2 py-1 rounded ${statusClass}">${appointment.status || 'Pending'}</span>
+          </td>
+          <td class="py-3 px-4 border-b">
+            <button onclick="editAppointment('${appointment.id}')" 
+                    class="text-blue-500 hover:text-blue-700 mr-2 transition" 
+                    title="Edit">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button onclick="confirmDelete('${appointment.id}')" 
+                    class="text-red-500 hover:text-red-700 transition" 
+                    title="Delete">
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        `;
+        appointmentsList.appendChild(row);
+      });
+    }
+
+    // Get appropriate CSS class for status
+    function getStatusClass(status) {
+      if (!status) return 'bg-gray-100 text-gray-800';
+      switch(status.toLowerCase()) {
+        case 'confirmed':
+          return 'status-confirmed';
+        case 'cancelled':
+          return 'status-cancelled';
+        case 'pending':
+          return 'status-pending';
+        default:
+          return 'bg-gray-100 text-gray-800';
+      }
+    }
+
+    // Show when no appointments are found
+    function renderEmptyAppointments() {
+      const appointmentsList = document.getElementById("appointmentsList");
+      appointmentsList.innerHTML = `
+        <tr>
+          <td colspan="5" class="py-4 text-center text-red-500">Error loading appointments. Please try again later.</td>
+        </tr>
+      `;
+    }
+
+    // Handle form submission
+    async function handleFormSubmit(e) {
+      e.preventDefault();
+      showLoading(true);
+      
+      const appointmentId = document.getElementById("appointmentId").value;
+      const method = appointmentId ? "PUT" : "POST";
+      const url = appointmentId 
+        ? `http://localhost:8080/api/appointments/${appointmentId}`
+        : "http://localhost:8080/api/appointments";
+      
+      const formData = {
+        customerName: document.getElementById("name").value,
+        email: document.getElementById("email").value,
+        phone: document.getElementById("phone").value,
+        serviceType: document.getElementById("service").value,
+        appointmentDateTime: new Date(
+          document.getElementById("date").value + "T" + 
+          document.getElementById("time").value
+        ).toISOString()
+      };
+
+      try {
+        const response = await fetch(url, {
+          method: method,
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData)
+        });
+        
+        if (response.ok) {
+          const message = appointmentId 
+            ? "Appointment updated successfully!" 
+            : "Appointment booked successfully!";
+          showToast(message, "success");
+          
+          // Reset form and reload data
+          document.getElementById("bookingForm").reset();
+          document.getElementById("appointmentId").value = "";
+          
+          // Reload appointments
+          await loadAppointments();
+        } else {
+          const error = await response.json();
+          throw new Error(error.message || "Failed to process appointment");
+        }
+      } catch (error) {
+        showToast("Error: " + error.message, "error");
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    // Edit an appointment
+    async function editAppointment(id) {
+      showLoading(true);
+      try {
+        const response = await fetch(`http://localhost:8080/api/appointments/${id}`);
+        if (response.ok) {
+          const appointment = await response.json();
+          const date = new Date(appointment.appointmentDateTime);
+          
+          // Fill the form
+          document.getElementById("appointmentId").value = appointment.id;
+          document.getElementById("name").value = appointment.customerName;
+          document.getElementById("email").value = appointment.email;
+          document.getElementById("phone").value = appointment.phone;
+          document.getElementById("service").value = appointment.serviceType;
+          document.getElementById("date").value = date.toISOString().split('T')[0];
+          document.getElementById("time").value = date.toTimeString().substring(0, 5);
+          
+          // Scroll to the form
+          document.getElementById("booking").scrollIntoView({ behavior: 'smooth' });
+        } else {
+          const error = await response.json();
+          throw new Error(error.message || "Failed to load appointment");
+        }
+      } catch (error) {
+        showToast("Error: " + error.message, "error");
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    // Confirm before deleting
+    function confirmDelete(id) {
+      currentAppointmentId = id;
+      deleteConfirmation = true;
+      showToast("Are you sure you want to delete this appointment?", "warning");
+      
+      // Simple confirmation - you could replace this with a modal
+      if (confirm("Are you sure you want to delete this appointment?")) {
+        deleteAppointment(id);
+      }
+    }
+
+    // Delete an appointment
+    async function deleteAppointment(id) {
+      showLoading(true);
+      try {
+        const response = await fetch(`http://localhost:8080/api/appointments/${id}`, {
+          method: "DELETE"
+        });
+        
+        if (response.ok) {
+          showToast("Appointment deleted successfully!", "success");
+          await loadAppointments();
+        } else {
+          const error = await response.json();
+          throw new Error(error.message || "Failed to delete appointment");
+        }
+      } catch (error) {
+        showToast("Error: " + error.message, "error");
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    // Loading spinner
+    function showLoading(show) {
+      const spinner = document.getElementById("loadingSpinner");
+      spinner.style.display = show ? "flex" : "none";
+    }
+
+    // Toast notification
+    function showToast(message, type = "success") {
+      const toast = document.getElementById("toast");
+      const toastMessage = document.getElementById("toastMessage");
+      
+      toastMessage.textContent = message;
+      
+      // Set color based on type
+      if (type === "error") {
+        toast.className = "fixed bottom-4 right-4 bg-red-600 text-white px-6 py-3 rounded shadow-lg flex items-center z-40";
+      } else if (type === "warning") {
+        toast.className = "fixed bottom-4 right-4 bg-yellow-500 text-white px-6 py-3 rounded shadow-lg flex items-center z-40";
+      } else {
+        toast.className = "fixed bottom-4 right-4 bg-green-600 text-white px-6 py-3 rounded shadow-lg flex items-center z-40";
+      }
+      
+      toast.classList.remove("hidden");
+      
+      // Auto-hide after 5 seconds
+      setTimeout(hideToast, 5000);
+    }
+
+    function hideToast() {
+      document.getElementById("toast").classList.add("hidden");
+    }
+
+    // Make functions available globally
+    window.editAppointment = editAppointment;
+    window.confirmDelete = confirmDelete;
+    window.hideToast = hideToast;
+  </script>
+</body>
+</html>  
